@@ -1,25 +1,27 @@
 {
   "short_name": "مواقيت تونس",
   "name": "مواقيت الصلاة في تونس",
-  "icons": [
-    {
-      "src": "https://cdn-icons-png.flaticon.com/512/2319/2319865.png",
-      "sizes": "192x192",
-      "type": "image/png",
-      "purpose": "any"
-    },
-    {
-      "src": "https://cdn-icons-png.flaticon.com/512/2319/2319865.png",
-      "sizes": "512x512",
-      "type": "image/png",
-      "purpose": "any"
-    }
-  ],
+  "id": "mawakit-tunisia",
   "start_url": "/",
   "display": "standalone",
   "theme_color": "#7f1d1d",
   "background_color": "#f3f4f6",
   "orientation": "portrait",
+  "scope": "/",
   "lang": "ar-TN",
-  "dir": "rtl"
+  "dir": "rtl",
+  "icons": [
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/2319/2319865.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "https://cdn-icons-png.flaticon.com/512/2319/2319865.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
 }
