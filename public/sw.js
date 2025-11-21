@@ -1,7 +1,7 @@
 
 /* eslint-disable no-restricted-globals */
 
-const CACHE_NAME = 'mawakit-tn-v2';
+const CACHE_NAME = 'mawakit-tn-v4';
 // إضافة الأيقونة للقائمة لضمان تحميلها عند التثبيت
 const ASSETS_TO_CACHE = [
   '/',

@@ -71,18 +71,15 @@ const Header: React.FC = () => {
   );
 
   const LogoCircle = ({ sizeClass = "w-12 h-12 md:w-16 md:h-16" }) => (
-    <div className={`relative ${sizeClass} rounded-full border-2 border-white/20 shadow-2xl overflow-hidden flex items-center justify-center bg-red-900 group`}>
-        <img 
-          src="https://flagcdn.com/tn.svg"
-          alt="Tunisia Flag"
-          className="absolute inset-0 w-full h-full object-cover opacity-40 mix-blend-multiply"
-          // @ts-ignore
-          fetchpriority="high"
-        />
+    <div className={`relative ${sizeClass} rounded-2xl shadow-2xl overflow-hidden flex items-center justify-center bg-white group border-2 border-white/50 ring-2 ring-white/20`}>
         <img 
           src={APP_LOGO_URL}
-          alt="Logo"
-          className="relative z-10 w-3/4 h-3/4 object-contain drop-shadow-md group-hover:scale-110 transition-transform duration-500"
+          alt="Mawakit Tunisia Logo"
+          className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+          onError={(e) => {
+            // Fallback if icon fails to load
+            e.currentTarget.src = "https://cdn-icons-png.flaticon.com/512/5982/5982090.png"; 
+          }}
         />
     </div>
   );
