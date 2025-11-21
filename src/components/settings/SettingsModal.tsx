@@ -1,7 +1,8 @@
 
-import React, { useState } from 'react';
-import { X, Bell, Clock, Volume2, VolumeX, Save, RotateCcw, Moon } from 'lucide-react';
+import React, { useState, useRef } from 'react';
+import { X, Volume2, VolumeX, Save, RotateCcw, Moon, Music, Play, Pause } from 'lucide-react';
 import { usePrayerData } from '../../context/PrayerContext';
+import { ADHAN_SOUNDS } from '../../constants/data';
 
 const PRAYER_NAMES_AR: { [key: string]: string } = {
   Fajr: 'الفجر',
@@ -19,10 +20,28 @@ const SettingsModal: React.FC = () => {
     isSettingsOpen, setIsSettingsOpen, 
     settings, updateGlobalEnabled, updatePrayerSetting,
     notificationsEnabled, requestPermission,
-    iqamaSettings, updateIqamaTime, resetIqamaDefaults, applyRamadanIqama
+    iqamaSettings, updateIqamaTime, resetIqamaDefaults, applyRamadanIqama,
+    adhanSoundId, setAdhanSoundId
   } = usePrayerData();
 
-  const [activeTab, setActiveTab] = useState<'notifications' | 'iqama'>('notifications');
+  const [activeTab, setActiveTab] = useState<'notifications' | 'iqama' | 'sound'>('notifications');
+  const [playingPreviewId, setPlayingPreviewId] = useState<string | null>(null);
+  const audioPreviewRef = useRef<HTMLAudioElement | null>(null);
+
+  const handlePlayPreview = (url: string, id: string) => {
+    if (playingPreviewId === id) {
+      audioPreviewRef.current?.pause();
+      setPlayingPreviewId(null);
+    } else {
+      if (audioPreviewRef.current) {
+        audioPreviewRef.current.pause();
+      }
+      audioPreviewRef.current = new Audio(url);
+      audioPreviewRef.current.play();
+      audioPreviewRef.current.onended = () => setPlayingPreviewId(null);
+      setPlayingPreviewId(id);
+    }
+  };
 
   if (!isSettingsOpen) return null;
 
@@ -49,10 +68,10 @@ const SettingsModal: React.FC = () => {
         </div>
 
         {/* Tabs */}
-        <div className="flex border-b border-gray-200 dark:border-slate-700 shrink-0">
+        <div className="flex border-b border-gray-200 dark:border-slate-700 shrink-0 overflow-x-auto">
           <button 
             onClick={() => setActiveTab('notifications')}
-            className={`flex-1 py-3 text-sm font-bold transition-colors ${
+            className={`flex-1 min-w-[90px] py-3 text-sm font-bold transition-colors whitespace-nowrap ${
               activeTab === 'notifications' 
                 ? 'text-red-800 dark:text-red-400 border-b-2 border-red-800 dark:border-red-400 bg-red-50 dark:bg-red-900/10' 
                 : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-slate-800'
@@ -61,8 +80,18 @@ const SettingsModal: React.FC = () => {
             التنبيهات
           </button>
           <button 
+            onClick={() => setActiveTab('sound')}
+            className={`flex-1 min-w-[90px] py-3 text-sm font-bold transition-colors whitespace-nowrap ${
+              activeTab === 'sound' 
+                ? 'text-red-800 dark:text-red-400 border-b-2 border-red-800 dark:border-red-400 bg-red-50 dark:bg-red-900/10' 
+                : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-slate-800'
+            }`}
+          >
+            الأصوات
+          </button>
+          <button 
             onClick={() => setActiveTab('iqama')}
-            className={`flex-1 py-3 text-sm font-bold transition-colors ${
+            className={`flex-1 min-w-[90px] py-3 text-sm font-bold transition-colors whitespace-nowrap ${
               activeTab === 'iqama' 
                 ? 'text-red-800 dark:text-red-400 border-b-2 border-red-800 dark:border-red-400 bg-red-50 dark:bg-red-900/10' 
                 : 'text-gray-500 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-slate-800'
@@ -128,6 +157,49 @@ const SettingsModal: React.FC = () => {
                 })}
               </div>
             </>
+          )}
+
+          {/* === Sound Settings === */}
+          {activeTab === 'sound' && (
+             <div className="space-y-3">
+                <div className="bg-red-50 dark:bg-red-900/10 p-3 rounded-xl flex items-start gap-3 text-sm text-red-800 dark:text-red-200 mb-2">
+                   <Music size={18} className="mt-0.5 shrink-0" />
+                   <p>اختر صوت المؤذن المفضل لديك للتنبيهات عند دخول وقت الصلاة.</p>
+                </div>
+
+                {ADHAN_SOUNDS.map((sound) => (
+                  <div 
+                    key={sound.id}
+                    onClick={() => setAdhanSoundId(sound.id)}
+                    className={`
+                      relative p-3 rounded-xl border transition-all cursor-pointer flex items-center justify-between
+                      ${adhanSoundId === sound.id 
+                        ? 'border-red-500 bg-red-50 dark:bg-red-900/20 ring-1 ring-red-500' 
+                        : 'border-gray-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:border-red-300'}
+                    `}
+                  >
+                    <div className="flex items-center gap-3">
+                       <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${adhanSoundId === sound.id ? 'border-red-600 bg-red-600' : 'border-gray-400'}`}>
+                          {adhanSoundId === sound.id && <div className="w-2 h-2 bg-white rounded-full" />}
+                       </div>
+                       <div className="flex flex-col">
+                          <span className="font-bold text-gray-800 dark:text-white text-sm">{sound.name}</span>
+                          {sound.isFajr && <span className="text-[10px] text-red-500 font-medium">مخصص للفجر</span>}
+                       </div>
+                    </div>
+                    
+                    <button 
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handlePlayPreview(sound.url, sound.id);
+                      }}
+                      className="p-2 bg-gray-100 dark:bg-slate-700 rounded-full hover:bg-gray-200 dark:hover:bg-slate-600 transition-colors text-gray-600 dark:text-gray-300"
+                    >
+                      {playingPreviewId === sound.id ? <Pause size={16} /> : <Play size={16} />}
+                    </button>
+                  </div>
+                ))}
+             </div>
           )}
 
           {/* === Iqama Settings === */}

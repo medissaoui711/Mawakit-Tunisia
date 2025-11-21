@@ -2,6 +2,7 @@
 import { useState, useEffect, useRef } from 'react';
 import { PrayerTimings, NotificationSettings } from '../types';
 import { sendNotification } from '../utils/notificationUtils';
+import { ADHAN_SOUNDS } from '../constants/data';
 
 const PRAYER_NAMES_AR: { [key: string]: string } = {
   Fajr: 'الفجر',
@@ -20,7 +21,7 @@ const SPECIAL_MESSAGES: { [key: string]: string[] } = {
 
 export const useAdhanNotification = (
   timings: PrayerTimings | null,
-  audioUrl: string,
+  adhanSoundId: string,
   settings: NotificationSettings
 ) => {
   const [notificationsEnabled, setNotificationsEnabled] = useState<boolean>(false);
@@ -30,12 +31,27 @@ export const useAdhanNotification = (
   // تخزين المفاتيح للإشعارات التي تم إرسالها بالفعل لمنع التكرار
   const notifiedPrayers = useRef<Set<string>>(new Set());
 
+  // Get current audio URL based on ID
+  const getCurrentAudioUrl = () => {
+    const sound = ADHAN_SOUNDS.find(s => s.id === adhanSoundId) || ADHAN_SOUNDS[0];
+    return sound.url;
+  };
+
   useEffect(() => {
     if ('Notification' in window) {
       setNotificationsEnabled(Notification.permission === 'granted');
     }
-    audioRef.current = new Audio(audioUrl);
-  }, [audioUrl]);
+    // Initialize audio
+    audioRef.current = new Audio(getCurrentAudioUrl());
+  }, []);
+
+  // Update audio source when ID changes
+  useEffect(() => {
+    if (audioRef.current) {
+      audioRef.current.src = getCurrentAudioUrl();
+      audioRef.current.load();
+    }
+  }, [adhanSoundId]);
 
   const requestPermission = async () => {
     if ('Notification' in window) {
@@ -114,6 +130,8 @@ export const useAdhanNotification = (
 
           // تشغيل الصوت
           if (audioRef.current) {
+            // Check for specific Fajr sound logic if needed
+            // For now, we rely on the globally selected sound
             audioRef.current.currentTime = 0;
             audioRef.current.play().catch(e => console.warn("Autoplay blocked", e));
           }
@@ -125,7 +143,7 @@ export const useAdhanNotification = (
 
     const interval = setInterval(checkTime, 5000); // فحص كل 5 ثواني لضمان الدقة
     return () => clearInterval(interval);
-  }, [timings, notificationsEnabled, settings]);
+  }, [timings, notificationsEnabled, settings, adhanSoundId]);
 
   return {
     notificationsEnabled,

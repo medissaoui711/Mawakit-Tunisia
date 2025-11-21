@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { RefreshCw, Moon, Sun, Settings, ChevronDown, Compass, Calendar } from 'lucide-react';
 import { CITIES, APP_LOGO_URL } from '../../constants/data';
 import { usePrayerData } from '../../context/PrayerContext';
@@ -13,11 +13,11 @@ const Header: React.FC = () => {
     selectedCity, setSelectedCity, 
     loading, refetch, 
     hijriDate, setIsSettingsOpen,
-    setIsQiblaOpen // New Context Method
+    setIsQiblaOpen
   } = usePrayerData();
   
   const { isDark, toggleDarkMode } = useTheme();
-  const [isImsakiyaOpen, setIsImsakiyaOpen] = React.useState(false);
+  const [isImsakiyaOpen, setIsImsakiyaOpen] = useState(false);
 
   const today = new Date();
   const gregorianDateString = getArabicDateString(today);

@@ -1,13 +1,12 @@
 
-import React, { createContext, useContext, useState, ReactNode, useMemo } from 'react';
+import React, { createContext, useContext, useState, ReactNode, useMemo, useEffect } from 'react';
 import { CityOption, PrayerTimings, NotificationSettings, IqamaSettings } from '../types';
-import { CITIES } from '../constants/data';
+import { CITIES, ADHAN_SOUNDS } from '../constants/data';
 import { usePrayerTimes } from '../hooks/usePrayerTimes';
 import { useCountdown } from '../hooks/useCountdown';
 import { useAdhanNotification } from '../hooks/useAdhanNotification';
 import { useNotificationSettings } from '../hooks/useNotificationSettings';
 import { useIqamaSettings } from '../hooks/useIqamaSettings';
-import { ADHAN_AUDIO_URL } from '../constants/data';
 
 interface PrayerContextType {
   selectedCity: CityOption;
@@ -46,6 +45,10 @@ interface PrayerContextType {
   // Qibla Modal Control
   isQiblaOpen: boolean;
   setIsQiblaOpen: (val: boolean) => void;
+
+  // Adhan Sound Logic
+  adhanSoundId: string;
+  setAdhanSoundId: (id: string) => void;
 }
 
 const PrayerContext = createContext<PrayerContextType | undefined>(undefined);
@@ -54,6 +57,15 @@ export const PrayerProvider: React.FC<{ children: ReactNode }> = ({ children }) 
   const [selectedCity, setSelectedCity] = useState<CityOption>(CITIES[0]);
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [isQiblaOpen, setIsQiblaOpen] = useState(false);
+  
+  // Adhan Sound State
+  const [adhanSoundId, setAdhanSoundId] = useState<string>(() => {
+     return localStorage.getItem('mawakit_adhan_sound') || 'makkah';
+  });
+
+  useEffect(() => {
+    localStorage.setItem('mawakit_adhan_sound', adhanSoundId);
+  }, [adhanSoundId]);
   
   // 1. Data Hooks
   const { timings, hijriDate, loading, error, isOffline, isStale, refetch } = usePrayerTimes(selectedCity);
@@ -64,9 +76,10 @@ export const PrayerProvider: React.FC<{ children: ReactNode }> = ({ children }) 
   const { iqamaSettings, updateIqamaTime, resetToDefaults, applyRamadanPreset } = useIqamaSettings();
 
   // 3. Notification Logic
+  // Pass the dynamic selected sound ID to the hook
   const { notificationsEnabled, requestPermission, enableAudio, audioUnlocked } = useAdhanNotification(
     timings, 
-    ADHAN_AUDIO_URL,
+    adhanSoundId, 
     settings
   );
 
@@ -100,12 +113,15 @@ export const PrayerProvider: React.FC<{ children: ReactNode }> = ({ children }) 
     applyRamadanIqama: applyRamadanPreset,
     // New Qibla Props
     isQiblaOpen,
-    setIsQiblaOpen
+    setIsQiblaOpen,
+    // Adhan Sound
+    adhanSoundId,
+    setAdhanSoundId
   }), [
     selectedCity, timings, hijriDate, loading, error, isOffline, isStale, 
     nextPrayer, nextPrayerEn, countdown, isUrgent, 
     notificationsEnabled, audioUnlocked, settings, isSettingsOpen,
-    iqamaSettings, isQiblaOpen
+    iqamaSettings, isQiblaOpen, adhanSoundId
   ]);
 
   return (

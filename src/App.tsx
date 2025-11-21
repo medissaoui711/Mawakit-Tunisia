@@ -5,7 +5,7 @@ import PrayerCard from './components/PrayerCard';
 import CountdownTimer from './components/CountdownTimer';
 import StatusBanner from './components/common/StatusBanner';
 import SettingsModal from './components/settings/SettingsModal';
-import QiblaCompass from './components/QiblaCompass'; // Import Qibla Component
+import QiblaCompass from './components/QiblaCompass';
 import InstallPrompt from './components/common/InstallPrompt';
 import WeeklySchedule from './components/desktop/WeeklySchedule';
 import DayTimeline from './components/desktop/DayTimeline';
@@ -13,7 +13,7 @@ import DayTimeline from './components/desktop/DayTimeline';
 import { PrayerProvider, usePrayerData } from './context/PrayerContext';
 import { ThemeProvider, useTheme } from './context/ThemeContext';
 import { DeviceProvider, useDevice } from './context/DeviceContext';
-import { CITIES } from './constants/data'; // Removed hardcoded IQAMA_OFFSETS
+import { CITIES } from './constants/data';
 import { useSwipe } from './hooks/useSwipe';
 import { useViewportHeight } from './hooks/useViewportHeight';
 import { useWeeklySchedule } from './hooks/useWeeklySchedule';
@@ -26,7 +26,7 @@ const AppContent: React.FC = () => {
     nextPrayerEn, countdown, isUrgent,
     requestPermission, enableAudio, audioUnlocked,
     selectedCity, setSelectedCity, setIsSettingsOpen,
-    iqamaSettings, // Use dynamic settings
+    iqamaSettings,
     isQiblaOpen, setIsQiblaOpen
   } = usePrayerData();
 

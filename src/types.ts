@@ -83,6 +83,7 @@ export interface CalendarData {
     };
     hijri: {
       date: string;
+      day: string;
       weekday: { ar: string };
       month: { ar: string };
       year: string;

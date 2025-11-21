@@ -14,7 +14,7 @@ export const CITIES: CityOption[] = [
 
 export const APP_LOGO_URL = "https://cdn-icons-png.flaticon.com/512/2319/2319865.png";
 
-// Legacy string exports for backward compatibility if needed, but we will move to numbers
+// Legacy string exports for backward compatibility if needed
 export const IQAMA_OFFSETS = {
   Fajr: '+25',
   Sunrise: '--',
@@ -45,7 +45,7 @@ export const RAMADAN_IQAMA_SETTINGS: IqamaSettings = {
 export const ADHAN_SOUNDS: AdhanSound[] = [
   { id: 'makkah', name: 'مكة المكرمة', url: 'https://media.blubrry.com/muslim_central_quran/podcasts.qurancentral.com/adhan/adhan-makkah-2.mp3' },
   { id: 'madinah', name: 'المدينة المنورة', url: 'https://media.blubrry.com/muslim_central_quran/podcasts.qurancentral.com/adhan/adhan-madinah.mp3' },
-  { id: 'tunis', name: 'تونس (الزيتونة)', url: 'https://www.tvquran.com/uploads/adhan/Al-Zaytuna.mp3' }, // رابط تقريبي أو بديل
+  { id: 'tunis', name: 'تونس (الزيتونة)', url: 'https://www.tvquran.com/uploads/adhan/Al-Zaytuna.mp3' }, 
   { id: 'aqsa', name: 'المسجد الأقصى', url: 'https://media.blubrry.com/muslim_central_quran/podcasts.qurancentral.com/adhan/adhan-alaqsa.mp3' },
   { id: 'fajr', name: 'أذان الفجر الخاص', url: 'https://media.blubrry.com/muslim_central_quran/podcasts.qurancentral.com/adhan/adhan-fajr.mp3', isFajr: true },
 ];
