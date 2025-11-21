@@ -7,10 +7,10 @@ const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
   '/manifest.json',
-  'https://cdn-icons-png.flaticon.com/512/2319/2319865.png'
+  '/icon.png'
 ];
 
-const APP_LOGO = "https://cdn-icons-png.flaticon.com/512/2319/2319865.png";
+const APP_LOGO = "/icon.png";
 
 // المجالات الخارجية المسموح بتخزينها
 const EXTERNAL_DOMAINS = [
@@ -18,8 +18,7 @@ const EXTERNAL_DOMAINS = [
   'fonts.googleapis.com',
   'fonts.gstatic.com',
   'aistudiocdn.com',
-  'flagcdn.com',
-  'cdn-icons-png.flaticon.com'
+  'flagcdn.com'
 ];
 
 // 1. التثبيت (Install)
@@ -64,7 +63,7 @@ self.addEventListener('fetch', (event) => {
   const isExternalResource = EXTERNAL_DOMAINS.some(domain => event.request.url.includes(domain));
   const isInternalResource = event.request.url.startsWith(self.location.origin);
   // التحقق مما إذا كان الطلب هو للأيقونة تحديداً
-  const isAppIcon = event.request.url === APP_LOGO;
+  const isAppIcon = event.request.url.endsWith('icon.png');
 
   if (isInternalResource || isExternalResource || isAppIcon) {
     event.respondWith(

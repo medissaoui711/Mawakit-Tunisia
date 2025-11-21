@@ -12,7 +12,7 @@ export const CITIES: CityOption[] = [
   { nameAr: 'مدنين', apiName: 'Medenine' },
 ];
 
-export const APP_LOGO_URL = "https://cdn-icons-png.flaticon.com/512/2319/2319865.png";
+export const APP_LOGO_URL = "/icon.png";
 
 // Legacy string exports for backward compatibility if needed
 export const IQAMA_OFFSETS = {
