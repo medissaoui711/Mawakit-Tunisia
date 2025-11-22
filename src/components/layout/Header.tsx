@@ -71,7 +71,7 @@ const Header: React.FC = () => {
   );
 
   const LogoCircle = ({ sizeClass = "w-12 h-12 md:w-16 md:h-16" }) => (
-    <div className={`relative ${sizeClass} rounded-2xl shadow-2xl overflow-hidden flex items-center justify-center bg-white group border-2 border-white/50 ring-2 ring-white/20`}>
+    <div className={`relative ${sizeClass} rounded-xl shadow-2xl overflow-hidden flex items-center justify-center bg-white group border-[3px] border-white ring-1 ring-black/10`}>
         <img 
           src={APP_LOGO_URL}
           alt="Mawakit Tunisia Logo"

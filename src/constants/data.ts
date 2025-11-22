@@ -1,15 +1,30 @@
-
 import { CityOption, IqamaSettings, AdhanSound } from '../types';
 
 export const CITIES: CityOption[] = [
   { nameAr: 'تونس', apiName: 'Tunis' },
-  { nameAr: 'صفاقس', apiName: 'Sfax' },
-  { nameAr: 'سوسة', apiName: 'Sousse' },
-  { nameAr: 'قابس', apiName: 'Gabes' },
-  { nameAr: 'القيروان', apiName: 'Kairouan' },
+  { nameAr: 'أريانة', apiName: 'Ariana' },
+  { nameAr: 'باجة', apiName: 'Beja' },
+  { nameAr: 'بن عروس', apiName: 'Ben Arous' },
   { nameAr: 'بنزرت', apiName: 'Bizerte' },
-  { nameAr: 'نابل', apiName: 'Nabeul' },
+  { nameAr: 'تطاوين', apiName: 'Tataouine' },
+  { nameAr: 'توزر', apiName: 'Tozeur' },
+  { nameAr: 'جندوبة', apiName: 'Jendouba' },
+  { nameAr: 'زغوان', apiName: 'Zaghouan' },
+  { nameAr: 'سليانة', apiName: 'Siliana' },
+  { nameAr: 'سوسة', apiName: 'Sousse' },
+  { nameAr: 'سيدي بوزيد', apiName: 'Sidi Bouzid' },
+  { nameAr: 'صفاقس', apiName: 'Sfax' },
+  { nameAr: 'قابس', apiName: 'Gabes' },
+  { nameAr: 'قبلي', apiName: 'Kebili' },
+  { nameAr: 'القصرين', apiName: 'Kasserine' },
+  { nameAr: 'قفصة', apiName: 'Gafsa' },
+  { nameAr: 'القيروان', apiName: 'Kairouan' },
+  { nameAr: 'الكاف', apiName: 'El Kef' },
+  { nameAr: 'المهدية', apiName: 'Mahdia' },
+  { nameAr: 'المنستير', apiName: 'Monastir' },
   { nameAr: 'مدنين', apiName: 'Medenine' },
+  { nameAr: 'منوبة', apiName: 'Manouba' },
+  { nameAr: 'نابل', apiName: 'Nabeul' },
 ];
 
 export const APP_LOGO_URL = "/icon.png";
