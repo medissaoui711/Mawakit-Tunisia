@@ -7,6 +7,7 @@ import StatusBanner from './components/common/StatusBanner';
 import SettingsModal from './components/settings/SettingsModal';
 import QiblaCompass from './components/QiblaCompass';
 import InstallPrompt from './components/common/InstallPrompt';
+import AudioPermissionModal from './components/common/AudioPermissionModal';
 import WeeklySchedule from './components/desktop/WeeklySchedule';
 import DayTimeline from './components/desktop/DayTimeline';
 
@@ -38,7 +39,7 @@ const AppContent: React.FC = () => {
   const handleUserInteraction = () => {
     if (!audioUnlocked) {
       enableAudio();
-      requestPermission();
+      // We don't force request permission on every click anymore, handled by the Modal
     }
   };
 
@@ -75,9 +76,9 @@ const AppContent: React.FC = () => {
     >
       <StatusBanner />
       <SettingsModal />
-      {/* Render Qibla Compass */}
       <QiblaCompass isOpen={isQiblaOpen} onClose={() => setIsQiblaOpen(false)} />
       <InstallPrompt />
+      <AudioPermissionModal />
 
       {/* Responsive Layout Strategy */}
       <div className="flex flex-col lg:flex-row h-full">

@@ -1,5 +1,5 @@
 
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { X, Volume2, VolumeX, Save, RotateCcw, Moon, Music, Play, Pause } from 'lucide-react';
 import { usePrayerData } from '../../context/PrayerContext';
 import { ADHAN_SOUNDS } from '../../constants/data';
@@ -21,26 +21,35 @@ const SettingsModal: React.FC = () => {
     settings, updateGlobalEnabled, updatePrayerSetting,
     notificationsEnabled, requestPermission,
     iqamaSettings, updateIqamaTime, resetIqamaDefaults, applyRamadanIqama,
-    adhanSoundId, setAdhanSoundId
+    adhanSoundId, setAdhanSoundId,
+    playPreview, stopAudio
   } = usePrayerData();
 
   const [activeTab, setActiveTab] = useState<'notifications' | 'iqama' | 'sound'>('notifications');
   const [playingPreviewId, setPlayingPreviewId] = useState<string | null>(null);
-  const audioPreviewRef = useRef<HTMLAudioElement | null>(null);
 
-  const handlePlayPreview = (url: string, id: string) => {
+  // التعامل مع معاينة الصوت
+  const handlePlayPreview = (id: string) => {
     if (playingPreviewId === id) {
-      audioPreviewRef.current?.pause();
+      stopAudio();
       setPlayingPreviewId(null);
     } else {
-      if (audioPreviewRef.current) {
-        audioPreviewRef.current.pause();
-      }
-      audioPreviewRef.current = new Audio(url);
-      audioPreviewRef.current.play();
-      audioPreviewRef.current.onended = () => setPlayingPreviewId(null);
+      stopAudio(); // إيقاف أي صوت سابق
+      playPreview(id);
       setPlayingPreviewId(id);
+      
+      // إعادة تعيين الأيقونة بعد فترة تقريبية (أو يمكن تحسينها بحدث onEnded من Context)
+      setTimeout(() => {
+        setPlayingPreviewId(null);
+      }, 15000); // افتراض أن المعاينة تنتهي
     }
+  };
+
+  // إيقاف الصوت عند إغلاق المودال
+  const handleClose = () => {
+    stopAudio();
+    setPlayingPreviewId(null);
+    setIsSettingsOpen(false);
   };
 
   if (!isSettingsOpen) return null;
@@ -50,7 +59,7 @@ const SettingsModal: React.FC = () => {
       {/* Backdrop */}
       <div 
         className="absolute inset-0 bg-black/60 backdrop-blur-sm transition-opacity"
-        onClick={() => setIsSettingsOpen(false)}
+        onClick={handleClose}
       />
 
       {/* Modal Content */}
@@ -60,7 +69,7 @@ const SettingsModal: React.FC = () => {
         <div className="bg-red-900 dark:bg-slate-900 p-4 flex justify-between items-center text-white shrink-0">
           <h2 className="text-lg font-bold">الإعدادات</h2>
           <button 
-            onClick={() => setIsSettingsOpen(false)}
+            onClick={handleClose}
             className="p-1 hover:bg-white/10 rounded-full transition-colors"
           >
             <X size={24} />
@@ -170,7 +179,10 @@ const SettingsModal: React.FC = () => {
                 {ADHAN_SOUNDS.map((sound) => (
                   <div 
                     key={sound.id}
-                    onClick={() => setAdhanSoundId(sound.id)}
+                    onClick={() => {
+                      setAdhanSoundId(sound.id);
+                      handlePlayPreview(sound.id);
+                    }}
                     className={`
                       relative p-3 rounded-xl border transition-all cursor-pointer flex items-center justify-between
                       ${adhanSoundId === sound.id 
@@ -191,7 +203,7 @@ const SettingsModal: React.FC = () => {
                     <button 
                       onClick={(e) => {
                         e.stopPropagation();
-                        handlePlayPreview(sound.url, sound.id);
+                        handlePlayPreview(sound.id);
                       }}
                       className="p-2 bg-gray-100 dark:bg-slate-700 rounded-full hover:bg-gray-200 dark:hover:bg-slate-600 transition-colors text-gray-600 dark:text-gray-300"
                     >
@@ -252,7 +264,7 @@ const SettingsModal: React.FC = () => {
         {/* Footer */}
         <div className="p-4 border-t border-gray-100 dark:border-slate-700 bg-gray-50 dark:bg-slate-800/50 shrink-0">
           <button 
-            onClick={() => setIsSettingsOpen(false)}
+            onClick={handleClose}
             className="w-full py-2.5 bg-red-900 hover:bg-red-800 text-white rounded-xl font-bold shadow-lg transition-colors flex items-center justify-center gap-2"
           >
             <Save size={18} />

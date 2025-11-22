@@ -12,12 +12,13 @@ export const useWeeklySchedule = (selectedCity: CityOption) => {
       const now = new Date();
       const month = now.getMonth() + 1;
       const year = now.getFullYear();
-      const cacheKey = `mawakit_calendar_${selectedCity.apiName}_${month}_${year}`;
+      // استخدام البادئة الجديدة لتوحيد التخزين
+      const cacheKey = `mawakit-cache-calendar-${selectedCity.apiName}_${month}_${year}`;
       
       // Check Cache
-      const cached = cacheUtils.get<CalendarData[]>(cacheKey);
+      const cached = cacheUtils.get<CalendarData[]>(cacheKey, selectedCity.apiName);
       if (cached) {
-        setSchedule(cached);
+        setSchedule(cached.data);
         return;
       }
 
@@ -29,7 +30,7 @@ export const useWeeklySchedule = (selectedCity: CityOption) => {
         const data: AlAdhanCalendarResponse = await response.json();
         if (data.code === 200) {
           setSchedule(data.data);
-          cacheUtils.set(cacheKey, data.data, 24 * 60 * 60 * 1000 * 7); // Cache for 1 week
+          cacheUtils.set(cacheKey, data.data, selectedCity.apiName); 
         }
       } catch (error) {
         console.error("Failed to fetch schedule", error);

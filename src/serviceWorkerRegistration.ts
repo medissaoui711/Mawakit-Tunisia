@@ -17,14 +17,11 @@ type Config = {
 
 export function register(config?: Config) {
   if ('serviceWorker' in navigator) {
-    const publicUrl = new URL(window.location.href);
-    if (publicUrl.origin !== window.location.origin) {
-      return;
-    }
+    // The URL constructor helps ensure we have a valid URL relative to the current page
+    // Using a relative path './sw.js' ensures compatibility with sub-path deployments
+    const swUrl = './sw.js';
 
     window.addEventListener('load', () => {
-      const swUrl = `/sw.js`;
-
       if (isLocalhost) {
         checkValidServiceWorker(swUrl, config);
         navigator.serviceWorker.ready.then(() => {
@@ -66,6 +63,12 @@ function registerValidSW(swUrl: string, config?: Config) {
       };
     })
     .catch((error) => {
+      // Suppress error specifically for origin mismatch in preview environments
+      // This happens when sw.js request is redirected to the platform login/dashboard (ai.studio)
+      if (error.message && (error.message.includes('origin') || error.message.includes('scriptURL'))) {
+        console.warn('Service Worker registration suppressed: Origin mismatch. This is expected in preview environments.', error.message);
+        return;
+      }
       console.error('Error during service worker registration:', error);
     });
 }

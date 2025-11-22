@@ -1,8 +1,10 @@
 
 /* eslint-disable no-restricted-globals */
 
-const CACHE_NAME = 'mawakit-tn-v5';
-// إضافة الأيقونة للقائمة لضمان تحميلها عند التثبيت
+const CACHE_NAME = 'mawakit-tn-v6';
+const API_CACHE_NAME = 'mawakit-api-v1';
+
+// الأصول الثابتة للتخزين
 const ASSETS_TO_CACHE = [
   '/',
   '/index.html',
@@ -18,17 +20,17 @@ const EXTERNAL_DOMAINS = [
   'fonts.googleapis.com',
   'fonts.gstatic.com',
   'aistudiocdn.com',
-  'flagcdn.com'
+  'flagcdn.com',
+  'media.blubrry.com',
+  'podcasts.qurancentral.com',
+  'www.tvquran.com'
 ];
 
 // 1. التثبيت (Install)
 self.addEventListener('install', (event) => {
-  // تخطي الانتظار لتفعيل الـ SW فوراً
   self.skipWaiting();
-  
   event.waitUntil(
     caches.open(CACHE_NAME).then((cache) => {
-      // محاولة تخزين الملفات الأساسية
       return cache.addAll(ASSETS_TO_CACHE).catch(err => {
         console.warn('Some assets failed to cache:', err);
       });
@@ -42,60 +44,81 @@ self.addEventListener('activate', (event) => {
     caches.keys().then((cacheNames) => {
       return Promise.all(
         cacheNames.map((cacheName) => {
-          if (cacheName !== CACHE_NAME) {
+          if (cacheName !== CACHE_NAME && cacheName !== API_CACHE_NAME) {
             return caches.delete(cacheName);
           }
         })
       );
     }).then(() => {
-      return self.clients.claim(); // السيطرة على الصفحات المفتوحة فوراً
+      return self.clients.claim();
     })
   );
 });
 
-// 3. استراتيجية الكاش (Network First with Cache Fallback)
+// 3. التعامل مع الطلبات (Fetch Strategy)
 self.addEventListener('fetch', (event) => {
-  // تجاهل طلبات API (تدار عبر التطبيق) وطلبات غير GET
-  if (event.request.method !== 'GET' || event.request.url.includes('api.aladhan.com')) {
-    return;
-  }
+  const requestUrl = new URL(event.request.url);
 
-  const isExternalResource = EXTERNAL_DOMAINS.some(domain => event.request.url.includes(domain));
-  const isInternalResource = event.request.url.startsWith(self.location.origin);
-  // التحقق مما إذا كان الطلب هو للأيقونة تحديداً
-  const isAppIcon = event.request.url.endsWith('icon.png');
-
-  if (isInternalResource || isExternalResource || isAppIcon) {
+  // أ) التعامل مع طلبات API (Network First falling back to Cache)
+  if (requestUrl.hostname === 'api.aladhan.com') {
     event.respondWith(
       fetch(event.request)
         .then((response) => {
-          // تحديث الكاش بالنسخة الجديدة من الشبكة
-          if (response && response.status === 200 && response.type === 'basic') {
+          // إذا نجح الاتصال، نحدث الكاش ونرجع البيانات
+          if (response && response.status === 200) {
             const responseToCache = response.clone();
-            caches.open(CACHE_NAME).then((cache) => {
+            caches.open(API_CACHE_NAME).then((cache) => {
               cache.put(event.request, responseToCache);
             });
+            return response;
           }
           return response;
         })
         .catch(() => {
-          // الفشل (أوفلاين) -> العودة للكاش
+          // إذا فشل الاتصال (أوفلاين)، نبحث في كاش الـ API
           return caches.match(event.request).then((cachedResponse) => {
             if (cachedResponse) {
               return cachedResponse;
             }
-            // صفحة احتياطية إذا لم يوجد كاش (يمكن إضافتها لاحقاً)
-            if (event.request.mode === 'navigate') {
-              return caches.match('/index.html');
-            }
-            return null;
+            // إذا لم نجد بيانات، نرجع خطأ JSON مناسب بدلاً من فشل كامل
+            return new Response(
+              JSON.stringify({ code: 503, status: "Offline", data: null }),
+              { headers: { 'Content-Type': 'application/json' } }
+            );
           });
         })
+    );
+    return;
+  }
+
+  // ب) التعامل مع الموارد الثابتة والخارجية (Stale-While-Revalidate)
+  const isExternalResource = EXTERNAL_DOMAINS.some(domain => requestUrl.hostname.includes(domain));
+  const isInternalResource = requestUrl.origin === self.location.origin;
+  const isAppIcon = requestUrl.pathname.endsWith('icon.png');
+
+  if (isInternalResource || isExternalResource || isAppIcon) {
+    event.respondWith(
+      caches.match(event.request).then((cachedResponse) => {
+        // نرجع النسخة المخبأة فوراً إن وجدت
+        const fetchPromise = fetch(event.request).then((networkResponse) => {
+          if (networkResponse && networkResponse.status === 200) {
+            const responseToCache = networkResponse.clone();
+            caches.open(CACHE_NAME).then((cache) => {
+              cache.put(event.request, responseToCache);
+            });
+          }
+          return networkResponse;
+        }).catch(() => {
+          // فشل الشبكة صامت هنا لأننا اعتمدنا على الكاش
+        });
+
+        return cachedResponse || fetchPromise;
+      })
     );
   }
 });
 
-// 4. الاستماع لرسائل من التطبيق (Message Event)
+// 4. الاستماع لرسائل من التطبيق (للإشعارات)
 self.addEventListener('message', (event) => {
   if (!event.data) return;
 
@@ -114,9 +137,7 @@ self.addEventListener('message', (event) => {
       lang: 'ar-TN',
       tag: 'prayer-notification',
       renotify: true,
-      data: {
-        url: self.location.origin
-      }
+      data: { url: self.location.origin }
     };
 
     event.waitUntil(
@@ -125,33 +146,7 @@ self.addEventListener('message', (event) => {
   }
 });
 
-// 5. التعامل مع إشعارات Push
-self.addEventListener('push', (event) => {
-  let data = {};
-  if (event.data) {
-    try {
-      data = event.data.json();
-    } catch (e) {
-      data = { title: 'مواقيت الصلاة', body: event.data.text() };
-    }
-  }
-
-  const options = {
-    body: data.body || 'تنبيه جديد',
-    icon: APP_LOGO,
-    badge: APP_LOGO,
-    vibrate: [100, 50, 100],
-    data: {
-      url: self.location.origin
-    }
-  };
-
-  event.waitUntil(
-    self.registration.showNotification(data.title || 'تنبيه', options)
-  );
-});
-
-// 6. التعامل مع النقر على الإشعار
+// 5. التعامل مع النقر على الإشعار
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
   event.waitUntil(

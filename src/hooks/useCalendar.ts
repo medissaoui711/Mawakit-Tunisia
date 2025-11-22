@@ -13,12 +13,13 @@ export const useCalendar = (selectedCity: CityOption) => {
 
   const fetchCalendar = async (month: number, year: number) => {
     setLoading(true);
-    const cacheKey = `mawakit_calendar_${selectedCity.apiName}_${month}_${year}`;
+    // استخدام البادئة الجديدة لتوحيد التخزين
+    const cacheKey = `mawakit-cache-calendar-${selectedCity.apiName}_${month}_${year}`;
     
     // Try cache first
-    const cached = cacheUtils.get<CalendarData[]>(cacheKey);
+    const cached = cacheUtils.get<CalendarData[]>(cacheKey, selectedCity.apiName);
     if (cached) {
-      setCalendarData(cached);
+      setCalendarData(cached.data);
       setLoading(false);
       return;
     }
@@ -30,7 +31,7 @@ export const useCalendar = (selectedCity: CityOption) => {
       const data: AlAdhanCalendarResponse = await response.json();
       if (data.code === 200) {
         setCalendarData(data.data);
-        cacheUtils.set(cacheKey, data.data, 24 * 60 * 60 * 1000 * 15); // Cache for 15 days
+        cacheUtils.set(cacheKey, data.data, selectedCity.apiName);
       }
     } catch (error) {
       console.error("Failed to fetch calendar", error);

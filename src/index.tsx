@@ -15,9 +15,16 @@ root.render(
   </React.StrictMode>
 );
 
-// تسجيل Service Worker للعمل دون اتصال ودعم الإشعارات
-// الآن يمكن تفعيله بأمان للنشر على Vercel
+// تسجيل Service Worker
 serviceWorkerRegistration.register({
-  onSuccess: () => console.log('SW Registered: App is offline-ready'),
-  onUpdate: () => console.log('SW Updated: New content available')
+  onSuccess: (registration) => {
+    console.log('SW Registered: App is offline-ready');
+  },
+  onUpdate: (registration) => {
+    console.log('SW Updated: New content available');
+    // يمكن هنا إضافة منطق لإظهار تنبيه للمستخدم لتحديث الصفحة
+    if (registration && registration.waiting) {
+      registration.waiting.postMessage({ type: 'SKIP_WAITING' });
+    }
+  }
 });
